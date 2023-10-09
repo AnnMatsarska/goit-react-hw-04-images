@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Component } from 'react';
 import { Header, Form, Button, Input } from './Searchbar.styled';
 
 import { ToastContainer, toast } from 'react-toastify';
@@ -7,40 +7,47 @@ import { notifications } from '../notifications/notifications';
 
 import { FaSearch } from 'react-icons/fa';
 
-export const Searchbar = ({ handleSearchedQuery }) => {
-  const [value, setValue] = useState('');
+export class Searchbar extends Component {
+  state = {
+    query: '',
+  };
 
-  const handleSubmit = evt => {
+  handleSubmit = evt => {
     evt.preventDefault();
-    if (value.trim() === '') {
+    const { query } = this.state;
+    if (query === '') {
       return toast.info('Please enter key words for search', notifications);
     }
 
-    handleSearchedQuery(value);
-    setValue('');
+    this.props.onSubmit(query);
+    this.setState({
+      query: '',
+    });
   };
 
-  const handleChange = evt => {
-    setValue(evt.target.value);
+  handleChange = event => {
+    this.setState({ query: event.target.value });
   };
 
-  return (
-    <Header>
-      <Form onSubmit={handleSubmit}>
-        <Button type="submit">
-          <FaSearch />
-        </Button>
-        <Input
-          type="text"
-          name="searchQuery"
-          value={value}
-          autoComplete="off"
-          autoFocus
-          placeholder="Search images and photos"
-          onChange={handleChange}
-        />
-      </Form>
-      <ToastContainer />
-    </Header>
-  );
-};
+  render() {
+    return (
+      <Header>
+        <Form onSubmit={this.handleSubmit}>
+          <Button type="submit">
+            <FaSearch />
+          </Button>
+          <Input
+            type="text"
+            name="query"
+            value={this.state.query}
+            autoComplete="off"
+            autoFocus
+            placeholder="Search images and photos"
+            onChange={this.handleChange}
+          />
+        </Form>
+        <ToastContainer />
+      </Header>
+    );
+  }
+}

@@ -1,9 +1,21 @@
-import { ItemImage } from './ImageGalleryItem.styled';
+import { ItemImage, Item } from './ImageGalleryItem.styled';
 
-export const ImageGalleryItem = ({ webformatURL, tags }) => {
+export const ImageGalleryItem = ({
+  webformatURL,
+  tags,
+  openModal,
+  largeImageURL,
+}) => {
   return (
     <>
-      <ItemImage src={webformatURL} alt={tags} loading="lazy" />
+      <Item>
+        <ItemImage
+          src={webformatURL}
+          alt={tags}
+          loading="lazy"
+          onClick={() => openModal(largeImageURL)}
+        />
+      </Item>
     </>
   );
 };

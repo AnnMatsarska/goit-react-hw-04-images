@@ -2,27 +2,27 @@ import { Component } from 'react';
 import { Overlay, ModalContent } from './Modal.styled';
 
 export class Modal extends Component {
-  componentDidMount() {
-    window.addEventListener('keydown', this.handleKeyDown);
-  }
+  componentDidMount = () => {
+    const { onClose } = this.props;
+    window.addEventListener('keydown', onClose);
+  };
+
   componentWillUnmount() {
-    window.removeEventListener('keydown', this.handleKeyDown);
+    const { onClose } = this.props;
+    window.removeEventListener('keydown', onClose);
   }
 
-  handleKeyDown = evt => {
-    if (evt.code === 'Escape') {
-      this.props.closeModal();
+  handleClick = evt => {
+    const { onClose } = this.props;
+    if (evt.target.nodeName === 'DIV' || evt.code === 'Escape') {
+      onClose();
     }
   };
-  closeModal = evt => {
-    if (evt.currentTarget === evt.target) {
-      this.props.closeModal();
-    }
-  };
+
   render() {
     const { largeImage, images } = this.props;
     return (
-      <Overlay onClick={this.closeModal}>
+      <Overlay onClick={this.handleClick}>
         <ModalContent>
           <img src={largeImage} alt={images.tags} />
         </ModalContent>
