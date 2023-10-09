@@ -64,48 +64,6 @@ export const App = () => {
     getImages();
   }, [page, query, error]);
 
-  // async componentDidUpdate(_, prevState) {
-  //   const { page, query } = this.state;
-  //   const perPage = 12;
-
-  //   if (prevState.query !== query || prevState.page !== page) {
-  //     try {
-  //       this.setState({ isLoading: true, isLoadMore: false });
-  //       const fetchedImages = await fetchImages(query, page, perPage);
-  //       const result = fetchedImages.hits;
-
-  //       this.setState(prevState => {
-  //         return {
-  //           images: [...prevState.images, ...result],
-  //           isLoadMore: true,
-  //         };
-  //       });
-
-  //       if (fetchedImages.totalHits < perPage * page && page !== 1) {
-  //         this.setState({ isLoadMore: false });
-  //       }
-
-  //       if (result.length < perPage && page === 1) {
-  //         this.setState({ isLoadMore: false });
-  //       }
-
-  //       if (result.length === 0 && page === 1) {
-  //         toast.warn(
-  //           'Sorry, there are no images matching your search query. Please try again.',
-  //           notifications
-  //         );
-  //         this.setState({ isLoadMore: false });
-  //       }
-  //     } catch (error) {
-  //       this.setState({
-  //         error: toast.error(error.message, notifications),
-  //       });
-  //     } finally {
-  //       this.setState({ isLoading: false });
-  //     }
-  //   }
-  // }
-
   const onSubmit = query => {
     setQuery(query);
     setPage(1);
