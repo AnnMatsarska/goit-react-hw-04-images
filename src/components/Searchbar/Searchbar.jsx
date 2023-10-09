@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState } from 'react';
 import { Header, Form, Button, Input } from './Searchbar.styled';
 
 import { ToastContainer, toast } from 'react-toastify';
@@ -7,47 +7,41 @@ import { notifications } from '../notifications/notifications';
 
 import { FaSearch } from 'react-icons/fa';
 
-export class Searchbar extends Component {
-  state = {
-    query: '',
-  };
+export const Searchbar = ({ onSubmit }) => {
+  const [query, setQuery] = useState('');
 
-  handleSubmit = evt => {
+  const handleSubmit = evt => {
     evt.preventDefault();
-    const { query } = this.state;
-    if (query === '') {
+
+    if (query.trim() === '') {
       return toast.info('Please enter key words for search', notifications);
     }
 
-    this.props.onSubmit(query);
-    this.setState({
-      query: '',
-    });
+    onSubmit(query);
+    setQuery('');
   };
 
-  handleChange = event => {
-    this.setState({ query: event.target.value });
+  const handleChange = evt => {
+    setQuery(evt.target.value);
   };
 
-  render() {
-    return (
-      <Header>
-        <Form onSubmit={this.handleSubmit}>
-          <Button type="submit">
-            <FaSearch />
-          </Button>
-          <Input
-            type="text"
-            name="query"
-            value={this.state.query}
-            autoComplete="off"
-            autoFocus
-            placeholder="Search images and photos"
-            onChange={this.handleChange}
-          />
-        </Form>
-        <ToastContainer />
-      </Header>
-    );
-  }
-}
+  return (
+    <Header>
+      <Form onSubmit={handleSubmit}>
+        <Button type="submit">
+          <FaSearch />
+        </Button>
+        <Input
+          type="text"
+          name="query"
+          value={query}
+          autoComplete="off"
+          autoFocus
+          placeholder="Search images and photos"
+          onChange={handleChange}
+        />
+      </Form>
+      <ToastContainer />
+    </Header>
+  );
+};

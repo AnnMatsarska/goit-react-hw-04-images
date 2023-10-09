@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { fetchImages } from 'services/pixabay-api';
 
 import { Searchbar } from './Searchbar/Searchbar';
@@ -12,43 +12,40 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import { notifications } from './notifications/notifications';
 
-export class App extends Component {
-  state = {
-    page: 1,
-    images: [],
-    largeImage: {},
-    query: '',
+export const App = () => {
+  const [page, setPage] = useState(1);
+  const [images, setImages] = useState([]);
+  const [largeImage, setLargeImage] = useState({});
+  const [query, setQuery] = useState('');
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadMore, setIsLoadMore] = useState(false);
+  const [isNeedShowModal, setIsNeedShowModal] = useState(false);
 
-    error: null,
-
-    isLoading: false,
-    isLoadMore: false,
-    isNeedShowModal: false,
-  };
-
-  async componentDidUpdate(_, prevState) {
-    const { page, query } = this.state;
+  useEffect(() => {
     const perPage = 12;
 
-    if (prevState.query !== query || prevState.page !== page) {
+    const getImages = async () => {
       try {
-        this.setState({ isLoading: true, isLoadMore: false });
+        if (query === '') return;
+
+        setIsLoading(true);
+        setIsLoadMore(false);
+
         const fetchedImages = await fetchImages(query, page, perPage);
         const result = fetchedImages.hits;
 
-        this.setState(prevState => {
-          return {
-            images: [...prevState.images, ...result],
-            isLoadMore: true,
-          };
+        setImages(prevImages => {
+          return [...prevImages, ...result];
         });
+        setIsLoadMore(true);
 
         if (fetchedImages.totalHits < perPage * page && page !== 1) {
-          this.setState({ isLoadMore: false });
+          setIsLoadMore(false);
         }
 
         if (result.length < perPage && page === 1) {
-          this.setState({ isLoadMore: false });
+          setIsLoadMore(false);
         }
 
         if (result.length === 0 && page === 1) {
@@ -56,64 +53,93 @@ export class App extends Component {
             'Sorry, there are no images matching your search query. Please try again.',
             notifications
           );
-          this.setState({ isLoadMore: false });
+          setIsLoadMore(false);
         }
       } catch (error) {
-        this.setState({
-          error: toast.error(error.message, notifications),
-        });
+        setError(toast.error(error.message, notifications));
       } finally {
-        this.setState({ isLoading: false });
+        setIsLoading(false);
       }
-    }
-  }
+    };
+    getImages();
+  }, [page, query, error]);
 
-  onSubmit = query => {
-    this.setState({
-      query,
-      page: 1,
-      images: [],
+  // async componentDidUpdate(_, prevState) {
+  //   const { page, query } = this.state;
+  //   const perPage = 12;
+
+  //   if (prevState.query !== query || prevState.page !== page) {
+  //     try {
+  //       this.setState({ isLoading: true, isLoadMore: false });
+  //       const fetchedImages = await fetchImages(query, page, perPage);
+  //       const result = fetchedImages.hits;
+
+  //       this.setState(prevState => {
+  //         return {
+  //           images: [...prevState.images, ...result],
+  //           isLoadMore: true,
+  //         };
+  //       });
+
+  //       if (fetchedImages.totalHits < perPage * page && page !== 1) {
+  //         this.setState({ isLoadMore: false });
+  //       }
+
+  //       if (result.length < perPage && page === 1) {
+  //         this.setState({ isLoadMore: false });
+  //       }
+
+  //       if (result.length === 0 && page === 1) {
+  //         toast.warn(
+  //           'Sorry, there are no images matching your search query. Please try again.',
+  //           notifications
+  //         );
+  //         this.setState({ isLoadMore: false });
+  //       }
+  //     } catch (error) {
+  //       this.setState({
+  //         error: toast.error(error.message, notifications),
+  //       });
+  //     } finally {
+  //       this.setState({ isLoading: false });
+  //     }
+  //   }
+  // }
+
+  const onSubmit = query => {
+    setQuery(query);
+    setPage(1);
+    setImages([]);
+  };
+
+  const onLoadMore = () => {
+    setPage(prevPage => {
+      return prevPage + 1;
     });
+    setIsLoadMore(false);
   };
 
-  onLoadMore = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-      isLoadMore: false,
-    }));
+  const openModal = image => {
+    setIsNeedShowModal(true);
+    setLargeImage(image);
   };
 
-  openModal = image => {
-    this.setState(() => ({
-      isNeedShowModal: true,
-      largeImage: image,
-    }));
+  const closeModal = () => {
+    setIsNeedShowModal(false);
+    setLargeImage('');
   };
 
-  closeModal = () => {
-    this.setState({ isNeedShowModal: false, largeImage: '' });
-  };
-
-  render() {
-    const { images, largeImage, isLoading, isLoadMore, isNeedShowModal } =
-      this.state;
-
-    return (
-      <>
-        <Searchbar onSubmit={this.onSubmit} />
-        {images.length !== 0 && (
-          <ImageGallery images={images} openModal={this.openModal} />
-        )}
-        {isLoading && <Loader />}
-        {isLoadMore && <Button onLoadMore={this.onLoadMore} />}
-        {isNeedShowModal && (
-          <Modal
-            largeImage={largeImage}
-            onClose={this.closeModal}
-            images={images}
-          />
-        )}
-      </>
-    );
-  }
-}
+  return (
+    <>
+      <Searchbar onSubmit={onSubmit} />
+      {images.length !== 0 && (
+        <ImageGallery images={images} openModal={openModal} />
+      )}
+      {isLoading && <Loader />}
+      {isLoadMore && <Button onLoadMore={onLoadMore} />}
+      {isNeedShowModal && (
+        <Modal largeImage={largeImage} onClose={closeModal} images={images} />
+      )}
+    </>
+  );
+};
